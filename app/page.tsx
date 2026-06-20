@@ -1,65 +1,322 @@
+// app/page.tsx
+"use client";
+
+import { motion, type Variants } from "framer-motion";
+import {
+  MessageCircleQuestion,
+  Sparkles,
+  Trophy,
+  HeartHandshake,
+  ArrowUpRight,
+  ArrowRight,
+  MessageSquare,
+  ThumbsUp,
+} from "lucide-react";
+import Blobs from "@/components/Blobs";
+import ScrollReveal from "@/components/ScrollReveal";
+import Link from "next/link";
 import Image from "next/image";
 
+const features = [
+  {
+    icon: MessageCircleQuestion,
+    title: "Ask Questions",
+    desc: "Post anything you're stuck on. Our community jumps in fast, with real, thoughtful answers.",
+    gradient: "bg-orange-500",
+  },
+  {
+    icon: Sparkles,
+    title: "Get Answers",
+    desc: "Receive clear, vetted solutions from people who've solved the exact same problem.",
+    gradient: "from-orange-500 to-pink-400",
+  },
+  {
+    icon: Trophy,
+    title: "Build Reputation",
+    desc: "Earn points, badges, and recognition every time you contribute something valuable.",
+    gradient: "from-amber-400 to-orange-500",
+  },
+  {
+    icon: HeartHandshake,
+    title: "Help Others",
+    desc: "Pay it forward. Share your expertise and become the person others rely on.",
+    gradient: "from-emerald-400 to-teal-400",
+  },
+];
+
+const questions = [
+  {
+    title: "How do I optimize a Next.js 14 app for Core Web Vitals?",
+    category: "Web Dev",
+    upvotes: 128,
+    answers: 14,
+  },
+  {
+    title: "Best way to structure a monorepo for 3 microservices?",
+    category: "Architecture",
+    upvotes: 96,
+    answers: 9,
+  },
+  {
+    title: "How to negotiate a remote job offer as a junior dev?",
+    category: "Career",
+    upvotes: 211,
+    answers: 22,
+  },
+  {
+    title: "What's the cleanest way to manage global state in 2026?",
+    category: "Frontend",
+    upvotes: 154,
+    answers: 18,
+  },
+  {
+    title: "Tips for staying consistent with a side project?",
+    category: "Productivity",
+    upvotes: 77,
+    answers: 11,
+  },
+  {
+    title: "How do I price freelance design work fairly?",
+    category: "Freelancing",
+    upvotes: 89,
+    answers: 7,
+  },
+];
+
+const container: Variants = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.12 },
+  },
+};
+
+const item: Variants = {
+  hidden: { opacity: 0, y: 24, filter: "blur(6px)" },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
+  },
+};
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+    <main className="relative overflow-x-hidden">
+      {/* HERO */}
+      <section
+      id="home"
+      className="relative min-h-screen flex flex-col items-center justify-center px-8 pt-40 pb-24 text-center overflow-hidden"
+    >
+      <Blobs />
+      <div className="absolute inset-0 -z-20">
         <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
+          src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1920&q=80&fit=crop"
+          alt="People collaborating"
+          fill
+          className="object-cover opacity-40"
           priority
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+        <div className="absolute inset-0 bg-gradient-to-b from-[#06060a]/70 via-[#06060a]/50 to-[#06060a]" />
+      </div>
+
+      {/* max-w-4xl se barha kar max-w-5xl kiya taake text khul kar aaye */}
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="relative z-10 max-w-5xl mx-auto flex flex-col items-center"
+      >
+        {/* Badge size thora barha kiya */}
+        <motion.div
+          variants={item}
+          className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-sm text-white/80 mb-8 shadow-inner"
+        >
+          <Sparkles className="h-4 w-4 text-orange-400" />
+          Join 50,000+ problem solvers worldwide
+        </motion.div>
+
+        {/* Heading sizes text-5xl/7xl se barha kar text-6xl/8xl kar di hain */}
+        <motion.h1
+          variants={item}
+          className="text-6xl md:text-8xl font-extrabold tracking-tight leading-[1.02]"
+        >
+          <span className="bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+            Ask. Solve. Help.
+          </span>
+          <br />
+          <span className="bg-gradient-to-r bg-orange-500 bg-clip-text text-transparent">
+            Grow Together.
+          </span>
+        </motion.h1>
+
+        {/* Description text barha aur prominent kiya */}
+        <motion.p
+          variants={item}
+          className="mt-8 text-xl md:text-2xl text-white/70 max-w-3xl mx-auto font-medium tracking-wide leading-relaxed"
+        >
+          A community where real people solve real problems in real time.
+        </motion.p>
+
+        {/* Buttons section ko clean kar ke single centered button bana diya */}
+        <motion.div
+          variants={item}
+          className="mt-12 flex items-center justify-center w-full"
+        >
+          <Link href="/questions" passHref legacyBehavior>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
+              className="group relative px-10 py-4.5 rounded-full text-lg font-semibold bg-gradient-to-r bg-orange-500 shadow-xl   transition-all duration-300 text-white cursor-pointer"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+              <span className="flex items-center gap-3">
+                Ask a Question
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1.5 transition-transform" />
+              </span>
+            </motion.button>
+          </Link>
+        </motion.div>
+      </motion.div>
+
+      {/* Bottom Scroll Indicator Icon */}
+      <motion.div
+        animate={{ y: [0, 10, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/40"
+      >
+        <svg width="26" height="26" fill="none" viewBox="0 0 24 24">
+          <path
+            d="M12 5v14m0 0l-6-6m6 6l6-6"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </motion.div>
+    </section>
+
+      {/* FEATURES */}
+      <section id="categories" className="relative px-6 py-24 max-w-7xl mx-auto">
+        <ScrollReveal className="text-center mb-16">
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+            Everything you need to{" "}
+            <span className="bg-orange-500 bg-clip-text text-transparent">
+              level up
+            </span>
+          </h2>
+          <p className="mt-4 text-white/50 max-w-xl mx-auto">
+            One platform. Endless ways to learn, share, and grow with people
+            who get it.
           </p>
+        </ScrollReveal>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((f, i) => (
+            <ScrollReveal key={f.title} delay={i * 0.1}>
+              <motion.div
+                whileHover={{ y: -8 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="group relative h-full rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-6 overflow-hidden hover:border-white/20 transition-colors"
+              >
+                <div
+                  className={`absolute -top-10 -right-10 h-32 w-32 rounded-full bg-gradient-to-br ${f.gradient} opacity-0 transition-opacity duration-500`}
+                />
+                <div
+                  className={`h-12 w-12 rounded-xl bg-gradient-to-br ${f.gradient} grid place-items-center mb-5 shadow-lg`}
+                >
+                  <f.icon className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{f.title}</h3>
+                <p className="text-sm text-white/50 leading-relaxed">
+                  {f.desc}
+                </p>
+              </motion.div>
+            </ScrollReveal>
+          ))}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* RECENT QUESTIONS */}
+      <section id="questions" className="relative px-6 py-24 max-w-7xl mx-auto">
+        <ScrollReveal className="flex items-end justify-between mb-12 flex-wrap gap-4">
+          <div>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+              Fresh from the community
+            </h2>
+            <p className="mt-3 text-white/50">
+              Real questions, real answers, happening right now.
+            </p>
+          </div>
+          <button className="flex items-center gap-1.5 text-sm text-orange-300 hover:text-orange-200 transition-colors">
+            View all questions <ArrowUpRight className="h-4 w-4" />
+          </button>
+        </ScrollReveal>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {questions.map((q, i) => (
+            <ScrollReveal key={q.title} delay={i * 0.08}>
+              <motion.div
+                whileHover={{ y: -6, scale: 1.01 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="h-full rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-6 hover:border-orange-400/30   transition-all cursor-pointer"
+              >
+                <span className="inline-block text-xs px-3 py-1 rounded-full bg-gradient-to-r from-orange-500/20 to-orange-500/20 border border-white/10 text-white/70 mb-4">
+                  {q.category}
+                </span>
+                <h3 className="text-base font-medium leading-snug mb-6 text-white/90">
+                  {q.title}
+                </h3>
+                <div className="flex items-center gap-5 text-sm text-white/40">
+                  <span className="flex items-center gap-1.5">
+                    <ThumbsUp className="h-4 w-4" /> {q.upvotes}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <MessageSquare className="h-4 w-4" /> {q.answers} answers
+                  </span>
+                </div>
+              </motion.div>
+            </ScrollReveal>
+          ))}
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* CTA */}
+      <section id="about" className="relative px-6 py-28">
+        <ScrollReveal className="max-w-5xl mx-auto">
+          <div className="relative rounded-3xl overflow-hidden border border-white/10 px-8 py-16 md:py-24 text-center bg-gradient-to-br from-orange-500/10 to-orange-500/5 backdrop-blur-xl">
+            <div className="absolute inset-0 " />
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+                Join Help Hub Today
+              </h2>
+              <p className="text-white/60 max-w-xl mx-auto mb-10">
+                Become part of a growing community of curious minds and
+                generous helpers. Your next breakthrough is one question away.
+              </p>
+              <motion.button
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.96 }}
+                className="px-8 py-4 rounded-full font-semibold bg-gradient-to-r bg-orange-500   transition-shadow"
+              >
+                Get Started — It's Free
+              </motion.button>
+            </div>
+          </div>
+        </ScrollReveal>
+
+        <footer className="mt-24 text-center text-white/30 text-sm">
+          © 2026 Help Hub. Built by the community, for the community.
+        </footer>
+      </section>
+    </main>
   );
 }
+
+
+
+
+
+
+
+
+
