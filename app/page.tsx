@@ -103,98 +103,98 @@ export default function Home() {
   return (
     <main className="relative overflow-x-hidden">
       {/* HERO */}
-      <section
-      id="home"
-      className="relative min-h-screen flex flex-col items-center justify-center px-8 pt-40 pb-24 text-center overflow-hidden"
+     <section
+  id="home"
+  // FIX: pt-32 (mobile) aur md:pt-40 (desktop) kiya, and px-6 on mobile taake space bache
+  className="relative min-h-screen flex flex-col items-center justify-center px-6 md:px-8 pt-32 md:pt-40 pb-24 text-center overflow-hidden"
+>
+  <Blobs />
+  <div className="absolute inset-0 -z-20">
+    <Image
+      src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1920&q=80&fit=crop"
+      alt="People collaborating"
+      fill
+      className="object-cover opacity-40"
+      priority
+    />
+    <div className="absolute inset-0 bg-gradient-to-b from-[#06060a]/70 via-[#06060a]/50 to-[#06060a]" />
+  </div>
+
+  <motion.div
+    variants={container}
+    initial="hidden"
+    animate="show"
+    className="relative z-10 max-w-5xl mx-auto flex flex-col items-center"
+  >
+    {/* Badge size mobile pe thora sleek kiya */}
+    <motion.div
+      variants={item}
+      className="inline-flex items-center gap-2.5 px-4 py-1.5 md:px-5 md:py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-xs md:text-sm text-white/80 mb-6 md:mb-8 shadow-inner"
     >
-      <Blobs />
-      <div className="absolute inset-0 -z-20">
-        <Image
-          src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1920&q=80&fit=crop"
-          alt="People collaborating"
-          fill
-          className="object-cover opacity-40"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#06060a]/70 via-[#06060a]/50 to-[#06060a]" />
-      </div>
+      <Sparkles className="h-3.5 w-3.5 md:h-4 md:w-4 text-orange-400" />
+      Join 50,000+ problem solvers worldwide
+    </motion.div>
 
-      {/* max-w-4xl se barha kar max-w-5xl kiya taake text khul kar aaye */}
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="relative z-10 max-w-5xl mx-auto flex flex-col items-center"
-      >
-        {/* Badge size thora barha kiya */}
-        <motion.div
-          variants={item}
-          className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-sm text-white/80 mb-8 shadow-inner"
-        >
-          <Sparkles className="h-4 w-4 text-orange-400" />
-          Join 50,000+ problem solvers worldwide
-        </motion.div>
+    {/* FIX: text-4xl ya text-5xl mobile ke liye best hai, desktop par text-8xl hi rahega */}
+    <motion.h1
+      variants={item}
+      className="text-4xl sm:text-5xl md:text-8xl font-extrabold tracking-tight leading-[1.1] md:leading-[1.02]"
+    >
+      <span className="bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+        Ask. Solve. Help.
+      </span>
+      <br />
+      <span className="bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-transparent">
+        Grow Together.
+      </span>
+    </motion.h1>
 
-        {/* Heading sizes text-5xl/7xl se barha kar text-6xl/8xl kar di hain */}
-        <motion.h1
-          variants={item}
-          className="text-6xl md:text-8xl font-extrabold tracking-tight leading-[1.02]"
+    {/* FIX: text-base/text-lg on mobile, md:text-2xl on desktop */}
+    <motion.p
+      variants={item}
+      className="mt-6 md:mt-8 text-base sm:text-lg md:text-2xl text-white/70 max-w-2xl md:max-w-3xl mx-auto font-medium tracking-wide leading-relaxed"
+    >
+      A community where real people solve real problems in real time.
+    </motion.p>
+
+    {/* Buttons section margin adjustment */}
+    <motion.div
+      variants={item}
+      className="mt-10 md:mt-12 flex items-center justify-center w-full"
+    >
+      <Link href="/questions" passHref legacyBehavior>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.97 }}
+          // FIX: Padding and font adjusted for mobile compatibility
+          className="group relative px-8 py-3.5 md:px-10 md:py-4 rounded-full text-base md:text-lg font-semibold bg-gradient-to-r from-orange-500 to-orange-400 shadow-xl transition-all duration-300 text-white cursor-pointer"
         >
-          <span className="bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
-            Ask. Solve. Help.
+          <span className="flex items-center gap-3">
+            Ask a Question
+            <ArrowRight className="h-5 w-5 group-hover:translate-x-1.5 transition-transform" />
           </span>
-          <br />
-          <span className="bg-gradient-to-r bg-orange-500 bg-clip-text text-transparent">
-            Grow Together.
-          </span>
-        </motion.h1>
+        </motion.button>
+      </Link>
+    </motion.div>
+  </motion.div>
 
-        {/* Description text barha aur prominent kiya */}
-        <motion.p
-          variants={item}
-          className="mt-8 text-xl md:text-2xl text-white/70 max-w-3xl mx-auto font-medium tracking-wide leading-relaxed"
-        >
-          A community where real people solve real problems in real time.
-        </motion.p>
-
-        {/* Buttons section ko clean kar ke single centered button bana diya */}
-        <motion.div
-          variants={item}
-          className="mt-12 flex items-center justify-center w-full"
-        >
-          <Link href="/questions" passHref legacyBehavior>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.97 }}
-              className="group relative px-10 py-4.5 rounded-full text-lg font-semibold bg-gradient-to-r bg-orange-500 shadow-xl   transition-all duration-300 text-white cursor-pointer"
-            >
-              <span className="flex items-center gap-3">
-                Ask a Question
-                <ArrowRight className="h-5 w-5 group-hover:translate-x-1.5 transition-transform" />
-              </span>
-            </motion.button>
-          </Link>
-        </motion.div>
-      </motion.div>
-
-      {/* Bottom Scroll Indicator Icon */}
-      <motion.div
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/40"
-      >
-        <svg width="26" height="26" fill="none" viewBox="0 0 24 24">
-          <path
-            d="M12 5v14m0 0l-6-6m6 6l6-6"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </motion.div>
-    </section>
-
+  {/* Bottom Scroll Indicator Icon */}
+  <motion.div
+    animate={{ y: [0, 10, 0] }}
+    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+    className="absolute bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 text-white/40"
+  >
+    <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+      <path
+        d="M12 5v14m0 0l-6-6m6 6l6-6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  </motion.div>
+</section>
       {/* FEATURES */}
       <section id="categories" className="relative px-6 py-24 max-w-7xl mx-auto">
         <ScrollReveal className="text-center mb-16">
