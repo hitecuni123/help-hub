@@ -1,7 +1,6 @@
-// app/questions/page.tsx
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -12,7 +11,7 @@ import {
   Image as ImageIcon,
   Smile,
   MoreHorizontal,
-  X, // Fixed: Added missing icon
+  X,
 } from "lucide-react";
 
 type Comment = {
@@ -35,39 +34,6 @@ type Post = {
   comments: Comment[];
 };
 
-const STORAGE_KEY = "helphub_feed_posts";
-
-const seedPosts: Post[] = [
-  {
-    id: "p1",
-    body: "How do I optimize a Next.js 14 app for Core Web Vitals? My LCP is sitting around 4.2s on mobile even after lazy-loading most components. Any real-world tips?",
-    author: "Ahmed",
-    authorImg: null,
-    likes: 12,
-    liked: false,
-    createdAt: Date.now() - 1000 * 60 * 60 * 5,
-    comments: [
-      {
-        id: "c1",
-        body: "Check your hero image — if it's not using next/image with priority, that's almost always the LCP culprit.",
-        author: "Sara K.",
-        authorImg: null,
-        createdAt: Date.now() - 1000 * 60 * 60 * 4,
-      },
-    ],
-  },
-  {
-    id: "p2",
-    body: "Best way to structure a monorepo for 3 microservices? Starting a new project with a Next.js frontend and two Node services. Turborepo or Nx?",
-    author: "Bilal R.",
-    authorImg: null,
-    likes: 6,
-    liked: false,
-    createdAt: Date.now() - 1000 * 60 * 60 * 20,
-    comments: [],
-  },
-];
-
 function timeAgo(ts: number) {
   const diff = Date.now() - ts;
   const mins = Math.floor(diff / 60000);
@@ -85,37 +51,54 @@ function initials(name: string) {
 export default function QuestionsPage() {
   const { data: session } = useSession();
   const [posts, setPosts] = useState<Post[]>([]);
-  const [hydrated, setHydrated] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [composerOpen, setComposerOpen] = useState(false);
   const [draft, setDraft] = useState("");
-  const [imagePreview, setImagePreview] = useState<string | null>(null); // Fixed: Moved inside component
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
   const [commentDraft, setCommentDraft] = useState<Record<string, string>>({});
 
   const userName = session?.user?.name || "Guest";
   const userImg = session?.user?.image || null;
 
-  // Hydration handling
+  // 1. FETCH ALL POSTS FROM DATABASE ON MOUNT
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
+    async function fetchPosts() {
       try {
-        setPosts(JSON.parse(stored));
-      } catch {
-        setPosts(seedPosts);
+        const res = await fetch("/api/posts");
+        if (!res.ok) throw new Error("Failed to fetch posts");
+        const data = await res.json();
+
+        const mappedPosts = data.map((p: any) => ({
+          id: p.id,
+          body: p.body,
+          author: p.author?.name || "User",
+          authorImg: p.author?.image || null,
+          image: p.image || null,
+          likes: p.likes || 0,
+          liked: false, // Wire up backend likes if schema supports user tracking
+          createdAt: new Date(p.createdAt).getTime(),
+          comments:
+            p.comments?.map((c: any) => ({
+              id: c.id,
+              body: c.body,
+              author: c.author?.name || "User",
+              authorImg: c.author?.image || null,
+              createdAt: new Date(c.createdAt).getTime(),
+            })) || [],
+        }));
+
+        setPosts(mappedPosts);
+      } catch (err) {
+        console.error("Error loading feed:", err);
+      } finally {
+        setLoading(false);
       }
-    } else {
-      setPosts(seedPosts);
     }
-    setHydrated(true);
+
+    fetchPosts();
   }, []);
 
-  // Sync with LocalStorage
-  useEffect(() => {
-    if (hydrated) localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
-  }, [posts, hydrated]);
-
-  // Fixed: Moved inside component scope to access state setters
   function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -130,23 +113,44 @@ export default function QuestionsPage() {
     reader.readAsDataURL(file);
   }
 
-  function handlePost() {
+  // 2. SAVING POST TO DATABASE VIA API
+  async function handlePost() {
     if (!draft.trim() && !imagePreview) return;
-    const post: Post = {
-      id: crypto.randomUUID(),
-      body: draft.trim(),
-      author: userName,
-      authorImg: userImg,
-      image: imagePreview,
-      likes: 0,
-      liked: false,
-      createdAt: Date.now(),
-      comments: [],
-    };
-    setPosts((prev) => [post, ...prev]);
-    setDraft("");
-    setImagePreview(null);
-    setComposerOpen(false);
+
+    try {
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          body: draft.trim(),
+          image: imagePreview, // Ensure your database handling endpoint accepts images if using them
+        }),
+      });
+
+      if (!res.ok) throw new Error("Could not save post");
+      const newDbPost = await res.json();
+
+      // Optimistic layout parsing directly using database verified parameters
+      const parsedPost: Post = {
+        id: newDbPost.id,
+        body: newDbPost.body,
+        author: newDbPost.author?.name || userName,
+        authorImg: newDbPost.author?.image || userImg,
+        image: newDbPost.image || null,
+        likes: newDbPost.likes || 0,
+        liked: false,
+        createdAt: new Date(newDbPost.createdAt).getTime(),
+        comments: [],
+      };
+
+      setPosts((prev) => [parsedPost, ...prev]);
+      setDraft("");
+      setImagePreview(null);
+      setComposerOpen(false);
+    } catch (err) {
+      console.error("Post creation failed:", err);
+      alert("Failed to submit your post. Please try again.");
+    }
   }
 
   function toggleLike(id: string) {
@@ -159,22 +163,38 @@ export default function QuestionsPage() {
     );
   }
 
-  function submitComment(postId: string) {
+  async function submitComment(postId: string) {
     const body = (commentDraft[postId] || "").trim();
     if (!body) return;
-    const comment: Comment = {
-      id: crypto.randomUUID(),
-      body,
-      author: userName,
-      authorImg: userImg,
-      createdAt: Date.now(),
-    };
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId ? { ...p, comments: [...p.comments, comment] } : p
-      )
-    );
-    setCommentDraft((prev) => ({ ...prev, [postId]: "" }));
+
+    try {
+      // Switch this URL to match your specific sub-comment API endpoint setup if different
+      const res = await fetch(`/api/posts/${postId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body }),
+      });
+
+      if (!res.ok) throw new Error("Failed to post comment");
+      const newComment = await res.json();
+
+      const comment: Comment = {
+        id: newComment.id,
+        body: newComment.body,
+        author: newComment.author?.name || userName,
+        authorImg: newComment.author?.image || userImg,
+        createdAt: new Date(newComment.createdAt).getTime(),
+      };
+
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === postId ? { ...p, comments: [...p.comments, comment] } : p
+        )
+      );
+      setCommentDraft((prev) => ({ ...prev, [postId]: "" }));
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   const sorted = [...posts].sort((a, b) => b.createdAt - a.createdAt);
@@ -203,7 +223,7 @@ export default function QuestionsPage() {
               <Avatar img={userImg} name={userName} size={40} />
               <span className="text-sm font-medium">{userName}</span>
             </div>
-            
+
             <textarea
               autoFocus
               value={draft}
@@ -233,7 +253,6 @@ export default function QuestionsPage() {
 
             <div className="flex items-center justify-between mt-3">
               <div className="flex gap-2 text-white/30">
-                {/* Custom File Upload Input Wrapper */}
                 <label className="p-2 rounded-lg hover:bg-white/10 hover:text-white/60 transition-colors cursor-pointer flex items-center justify-center">
                   <ImageIcon className="h-4 w-4" />
                   <input
@@ -261,7 +280,7 @@ export default function QuestionsPage() {
                 </button>
                 <button
                   onClick={handlePost}
-                  disabled={!draft.trim() && !imagePreview} // Fixed: Allow posting if image exists without text
+                  disabled={!draft.trim() && !imagePreview}
                   className="px-5 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-orange-500 to-amber-500 disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-orange-500/30 transition-all text-white"
                 >
                   Post
@@ -273,8 +292,10 @@ export default function QuestionsPage() {
       </div>
 
       {/* FEED */}
-      {!hydrated ? (
-        <div className="text-white/30 text-sm text-center">Loading...</div>
+      {loading ? (
+        <div className="text-white/30 text-sm text-center py-10 animate-pulse">Loading feed from database...</div>
+      ) : sorted.length === 0 ? (
+        <div className="text-white/30 text-sm text-center py-10">No questions posted yet. Be the first!</div>
       ) : (
         <div className="space-y-4">
           {sorted.map((post, i) => {
@@ -284,7 +305,7 @@ export default function QuestionsPage() {
                 key={post.id}
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.03 }}
+                transition={{ duration: 0.4, delay: Math.min(i * 0.03, 0.3) }}
                 className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl overflow-hidden"
               >
                 {/* Post Header */}
@@ -330,8 +351,7 @@ export default function QuestionsPage() {
                   <div className="px-4 pb-2 flex items-center justify-between text-xs text-white/30">
                     <span>{post.likes > 0 && `${post.likes} likes`}</span>
                     <span>
-                      {post.comments.length > 0 &&
-                        `${post.comments.length} comments`}
+                      {post.comments.length > 0 && `${post.comments.length} comments`}
                     </span>
                   </div>
                 )}
